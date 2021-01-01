@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
-{ 
+{
+    //animation
+    public Animator anim;
+   public float dirX;
+
+
+
     //walking
     public float speed;
     public float jumpForce;
@@ -22,16 +28,7 @@ public class PlayerController : MonoBehaviour
     private int extraJumps;
     public int extraJumpsValue;
 
-    //WallJumping
-    bool isTouchingFront;
-    public Transform frontCheck;
-    bool wallSliding;
-    public float wallSlidingSpeed;
-
-    bool wallJumping;
-    public float xWallForce;
-    public float yWallForce;
-    public float wallJumpTime;
+   
 
    void Start()
     {
@@ -53,25 +50,8 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = Vector2.up * jumpForce;
         }
-        isTouchingFront = Physics2D.OverlapCircle(frontCheck.position, checkRadius, whatIsGround);
-        if(isTouchingFront == true && isGrounded == false && moveInput !=0)
-        {
-            wallSliding = true;
-        }
-        else { wallSliding = false; }
-        if (wallSliding)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -wallSlidingSpeed, float.MaxValue));
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && wallSliding == true)
-        {
-            wallJumping = true;
-            Invoke("setWallJumping2False", wallJumpTime);
-        }
-        if(wallJumping == true)
-        {
-            rb.velocity = new Vector2(xWallForce * -moveInput, yWallForce);
-        }
+
+        dirX = Input.GetAxis("Horizontal") * speed;
 
     }
 
@@ -80,7 +60,7 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, whatIsGround);
 
 
-
+        //doABarrelRoll
         moveInput = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
 
@@ -91,6 +71,14 @@ public class PlayerController : MonoBehaviour
         {
             Flip();
         }
+        //animator
+        if (Mathf.Abs(dirX) > 0 && rb.velocity.y == 0)
+            anim.SetBool("isRunning", true);
+        else
+            anim.SetBool("isRunning", false);
+
+
+
 
     }
     void Flip()
@@ -101,9 +89,6 @@ public class PlayerController : MonoBehaviour
         transform.localScale = Scaler;
 
     }
-    void setWallJumping2False()
-    {
-        wallJumping = false;
-    }
+  
 
 }
